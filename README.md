@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.svg" alt="DSH RTL &amp; BiDi Plugin" width="100%" />
+</p>
+
 # DSH RTL & BiDi Plugin (`dsh-plugin-rtl`)
 
 Official Persian & Arabic bidirectional text (BiDi) and typography plugin for DeepSeek Harness (DSH) Web GUI.
