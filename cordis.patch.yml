@@ -1,0 +1,3 @@
+- insert:
+    - id: plugin-rtl
+      name: "dsh-plugin-rtl"

@@ -1,0 +1,49 @@
+{
+  "name": "dsh-plugin-rtl",
+  "version": "1.0.0",
+  "description": "Official Persian & Arabic RTL/BiDi support plugin for DeepSeek Harness Web",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "dsh-plugin",
+    "cordis",
+    "rtl",
+    "bidi",
+    "persian",
+    "arabic",
+    "vazirmatn",
+    "typography"
+  ],
+  "homepage": "https://github.com/surtr85/dsh-plugin-rtl#readme",
+  "bugs": {
+    "url": "https://github.com/surtr85/dsh-plugin-rtl/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/surtr85/dsh-plugin-rtl.git"
+  },
+  "license": "MIT",
+  "author": "Sajjad <surtr85>",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "engines": {
+      "dsh": ">=0.1.7"
+    },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  }
+}
