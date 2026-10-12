@@ -345,6 +345,8 @@ table td {
         document.addEventListener("input", handleInputEvent, true);
         document.addEventListener("keyup", handleInputEvent, true);
         document.addEventListener("paste", handleInputEvent, true);
+        document.addEventListener("compositionend", handleInputEvent, true);
+        document.addEventListener("focusin", handleInputEvent, true);
 
         // 4. MutationObserver for async streamed messages and dynamic UI
         const observer = new MutationObserver((mutations) => {
@@ -375,6 +377,8 @@ table td {
           document.removeEventListener("input", handleInputEvent, true);
           document.removeEventListener("keyup", handleInputEvent, true);
           document.removeEventListener("paste", handleInputEvent, true);
+          document.removeEventListener("compositionend", handleInputEvent, true);
+          document.removeEventListener("focusin", handleInputEvent, true);
           ctx.logger?.info("Cleaned up RTL & Persian BiDi plugin");
         };
 
