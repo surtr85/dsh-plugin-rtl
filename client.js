@@ -106,32 +106,27 @@ li[dir="rtl"]::marker {
    ========================================================================== */
 
 [contenteditable="true"],
+[contenteditable="true"] p,
+[contenteditable="true"] span,
+[contenteditable="true"] div,
 textarea,
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]) {
   unicode-bidi: plaintext !important;
   text-align: start !important;
 }
 
-[contenteditable="true"] p {
+[contenteditable="true"] [dir="rtl"],
+[contenteditable="true"] p[dir="rtl"],
+[contenteditable="true"] span[dir="rtl"] {
   unicode-bidi: plaintext !important;
   text-align: start !important;
 }
 
-[contenteditable="true"] p[dir="rtl"],
-[contenteditable="true"] p.dsh-rtl,
-[contenteditable="true"][dir="rtl"] p:not([dir="ltr"]),
-textarea[dir="rtl"],
-input[dir="rtl"] {
-  direction: rtl !important;
-  text-align: right !important;
-  unicode-bidi: isolate !important;
-}
-
+[contenteditable="true"] [dir="ltr"],
 [contenteditable="true"] p[dir="ltr"],
-textarea[dir="ltr"],
-input[dir="ltr"] {
-  direction: ltr !important;
-  text-align: left !important;
+[contenteditable="true"] span[dir="ltr"] {
+  unicode-bidi: plaintext !important;
+  text-align: start !important;
 }
 
 /* ==========================================================================
@@ -199,46 +194,34 @@ table td {
 
     function syncEditor(editor) {
       if (!editor) return;
-      const paragraphs = editor.querySelectorAll("p");
-      let dominantDir = null;
+      if (editor.getAttribute("dir") !== "auto") {
+        editor.setAttribute("dir", "auto");
+      }
+      editor.classList.remove("dsh-rtl");
 
+      const paragraphs = editor.querySelectorAll("p");
       if (paragraphs.length > 0) {
         for (const p of paragraphs) {
           const text = p.textContent || "";
           const dir = getFirstStrongDirection(text);
           if (dir === "rtl") {
             if (p.getAttribute("dir") !== "rtl") p.setAttribute("dir", "rtl");
-            p.classList.add("dsh-rtl");
-            if (dominantDir === null) dominantDir = "rtl";
           } else if (dir === "ltr") {
             if (p.getAttribute("dir") !== "ltr") p.setAttribute("dir", "ltr");
-            p.classList.remove("dsh-rtl");
-            if (dominantDir === null) dominantDir = "ltr";
+          } else {
+            if (p.getAttribute("dir") !== "auto") p.setAttribute("dir", "auto");
           }
+          p.classList.remove("dsh-rtl");
         }
-      } else {
-        const text = editor.textContent || "";
-        dominantDir = getFirstStrongDirection(text);
-      }
-
-      if (dominantDir === "rtl") {
-        if (editor.getAttribute("dir") !== "rtl") editor.setAttribute("dir", "rtl");
-      } else if (dominantDir === "ltr") {
-        if (editor.getAttribute("dir") !== "ltr") editor.setAttribute("dir", "ltr");
       }
     }
 
     function syncInput(input) {
       if (!input) return;
-      const text = input.value || "";
-      const dir = getFirstStrongDirection(text);
-      if (dir === "rtl") {
-        if (input.getAttribute("dir") !== "rtl") input.setAttribute("dir", "rtl");
-        input.classList.add("dsh-rtl");
-      } else if (dir === "ltr") {
-        if (input.getAttribute("dir") !== "ltr") input.setAttribute("dir", "ltr");
-        input.classList.remove("dsh-rtl");
+      if (input.getAttribute("dir") !== "auto") {
+        input.setAttribute("dir", "auto");
       }
+      input.classList.remove("dsh-rtl");
     }
 
     function processElement(el) {
@@ -264,8 +247,11 @@ table td {
       }
 
       // Handle user inputs & editors
-      if (el.isContentEditable || el.getAttribute("contenteditable") === "true") {
+      if (el.getAttribute("contenteditable") === "true") {
         syncEditor(el);
+        return;
+      }
+      if (el.closest?.('[contenteditable="true"]')) {
         return;
       }
       if (tagName === "textarea" || tagName === "input") {
