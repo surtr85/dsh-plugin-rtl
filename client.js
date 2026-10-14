@@ -106,27 +106,29 @@ li[dir="rtl"]::marker {
    ========================================================================== */
 
 [contenteditable="true"],
-[contenteditable="true"] p,
-[contenteditable="true"] span,
-[contenteditable="true"] div,
 textarea,
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]) {
-  unicode-bidi: plaintext !important;
-  text-align: start !important;
+  font-family: "Vazirmatn", var(--dsw-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
 }
 
-[contenteditable="true"] [dir="rtl"],
+[contenteditable="true"][dir="rtl"],
 [contenteditable="true"] p[dir="rtl"],
-[contenteditable="true"] span[dir="rtl"] {
-  unicode-bidi: plaintext !important;
-  text-align: start !important;
+[contenteditable="true"] div[dir="rtl"],
+textarea[dir="rtl"],
+input[dir="rtl"] {
+  direction: rtl !important;
+  text-align: right !important;
+  unicode-bidi: isolate !important;
 }
 
-[contenteditable="true"] [dir="ltr"],
+[contenteditable="true"][dir="ltr"],
 [contenteditable="true"] p[dir="ltr"],
-[contenteditable="true"] span[dir="ltr"] {
-  unicode-bidi: plaintext !important;
-  text-align: start !important;
+[contenteditable="true"] div[dir="ltr"],
+textarea[dir="ltr"],
+input[dir="ltr"] {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: isolate !important;
 }
 
 /* ==========================================================================
@@ -194,34 +196,48 @@ table td {
 
     function syncEditor(editor) {
       if (!editor) return;
-      if (editor.getAttribute("dir") !== "auto") {
-        editor.setAttribute("dir", "auto");
-      }
-      editor.classList.remove("dsh-rtl");
-
       const paragraphs = editor.querySelectorAll("p");
+      let dominantDir = null;
+
       if (paragraphs.length > 0) {
         for (const p of paragraphs) {
           const text = p.textContent || "";
           const dir = getFirstStrongDirection(text);
           if (dir === "rtl") {
             if (p.getAttribute("dir") !== "rtl") p.setAttribute("dir", "rtl");
+            if (dominantDir === null) dominantDir = "rtl";
           } else if (dir === "ltr") {
             if (p.getAttribute("dir") !== "ltr") p.setAttribute("dir", "ltr");
+            if (dominantDir === null) dominantDir = "ltr";
           } else {
-            if (p.getAttribute("dir") !== "auto") p.setAttribute("dir", "auto");
+            p.removeAttribute("dir");
           }
-          p.classList.remove("dsh-rtl");
         }
+      } else {
+        const text = editor.textContent || "";
+        dominantDir = getFirstStrongDirection(text);
+      }
+
+      if (dominantDir === "rtl") {
+        if (editor.getAttribute("dir") !== "rtl") editor.setAttribute("dir", "rtl");
+      } else if (dominantDir === "ltr") {
+        if (editor.getAttribute("dir") !== "ltr") editor.setAttribute("dir", "ltr");
+      } else {
+        editor.removeAttribute("dir");
       }
     }
 
     function syncInput(input) {
       if (!input) return;
-      if (input.getAttribute("dir") !== "auto") {
-        input.setAttribute("dir", "auto");
+      const text = input.value || "";
+      const dir = getFirstStrongDirection(text);
+      if (dir === "rtl") {
+        if (input.getAttribute("dir") !== "rtl") input.setAttribute("dir", "rtl");
+      } else if (dir === "ltr") {
+        if (input.getAttribute("dir") !== "ltr") input.setAttribute("dir", "ltr");
+      } else {
+        input.removeAttribute("dir");
       }
-      input.classList.remove("dsh-rtl");
     }
 
     function processElement(el) {
@@ -328,6 +344,19 @@ table td {
           }
         }
 
+        function handleKeyDown(e) {
+          if (e.key === "Enter" && e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            const editor = e.target?.closest?.('[contenteditable="true"]');
+            if (editor) {
+              e.preventDefault();
+              e.stopPropagation();
+              document.execCommand("insertParagraph");
+              setTimeout(() => syncEditor(editor), 10);
+            }
+          }
+        }
+
+        document.addEventListener("keydown", handleKeyDown, true);
         document.addEventListener("input", handleInputEvent, true);
         document.addEventListener("keyup", handleInputEvent, true);
         document.addEventListener("paste", handleInputEvent, true);
@@ -360,6 +389,7 @@ table td {
         const teardown = () => {
           styleEl.remove();
           observer.disconnect();
+          document.removeEventListener("keydown", handleKeyDown, true);
           document.removeEventListener("input", handleInputEvent, true);
           document.removeEventListener("keyup", handleInputEvent, true);
           document.removeEventListener("paste", handleInputEvent, true);
