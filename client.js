@@ -344,19 +344,6 @@ table td {
           }
         }
 
-        function handleKeyDown(e) {
-          if (e.key === "Enter" && e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
-            const editor = e.target?.closest?.('[contenteditable="true"]');
-            if (editor) {
-              e.preventDefault();
-              e.stopPropagation();
-              document.execCommand("insertParagraph");
-              setTimeout(() => syncEditor(editor), 10);
-            }
-          }
-        }
-
-        document.addEventListener("keydown", handleKeyDown, true);
         document.addEventListener("input", handleInputEvent, true);
         document.addEventListener("keyup", handleInputEvent, true);
         document.addEventListener("paste", handleInputEvent, true);
@@ -389,7 +376,6 @@ table td {
         const teardown = () => {
           styleEl.remove();
           observer.disconnect();
-          document.removeEventListener("keydown", handleKeyDown, true);
           document.removeEventListener("input", handleInputEvent, true);
           document.removeEventListener("keyup", handleInputEvent, true);
           document.removeEventListener("paste", handleInputEvent, true);
